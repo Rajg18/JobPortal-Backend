@@ -38,7 +38,10 @@ public class SecurityConfig {
                                 "/auth/addNewUser",
                                 "/auth/generateToken","/auth/test").permitAll()
                         .requestMatchers("/auth/user/**").hasAuthority("ROLE_USER")
+                        .requestMatchers("/api/profile/**").hasRole("USER")
                         .requestMatchers("/auth/admin/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/api/jobs/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/jobs/**").hasAnyRole("USER", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess ->
