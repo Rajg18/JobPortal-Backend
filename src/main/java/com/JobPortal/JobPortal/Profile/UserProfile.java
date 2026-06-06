@@ -1,6 +1,6 @@
 package com.JobPortal.JobPortal.Profile;
 
-import com.JobPortal.JobPortal.UserInfo;
+import com.JobPortal.JobPortal.user.UserInfo;
 import jakarta.persistence.*;
 
 @Entity

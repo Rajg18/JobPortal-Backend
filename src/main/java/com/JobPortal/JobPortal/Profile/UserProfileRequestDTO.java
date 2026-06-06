@@ -1,54 +1,33 @@
 package com.JobPortal.JobPortal.Profile;
+
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 
 public class UserProfileRequestDTO {
 
+    // Email is taken from the JWT token in the controller — not sent in the body.
 
-        @NotBlank
-        private String skills;
+    @NotBlank(message = "Skills are required")
+    private String skills;
 
-        @NotBlank
-        private String location;
+    @NotBlank(message = "Location is required")
+    private String location;
 
-        @NotBlank
-        private String phone;
+    @NotBlank(message = "Phone is required")
+    private String phone;
 
-        @Min(0)
-        private int experience;
+    @Min(value = 0, message = "Experience cannot be negative")
+    private int experience;
 
-        // getters & setters
+    public String getSkills()                { return skills; }
+    public void   setSkills(String skills)   { this.skills = skills; }
 
-    public @NotBlank String getSkills() {
-        return skills;
-    }
+    public String getLocation()                  { return location; }
+    public void   setLocation(String location)   { this.location = location; }
 
-    public void setSkills(@NotBlank String skills) {
-        this.skills = skills;
-    }
+    public String getPhone()               { return phone; }
+    public void   setPhone(String phone)   { this.phone = phone; }
 
-    public @NotBlank String getLocation() {
-        return location;
-    }
-
-    public void setLocation(@NotBlank String location) {
-        this.location = location;
-    }
-
-    public @NotBlank String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(@NotBlank String phone) {
-        this.phone = phone;
-    }
-
-    public @Min(0) int getExperience() {
-        return experience;
-    }
-
-    public void setExperience(@Min(0) int experience) {
-        this.experience = experience;
-    }
+    public int  getExperience()              { return experience; }
+    public void setExperience(int experience){ this.experience = experience; }
 }
-
