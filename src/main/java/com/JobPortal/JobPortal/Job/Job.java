@@ -1,6 +1,6 @@
 package com.JobPortal.JobPortal.Job;
 
-import com.JobPortal.JobPortal.UserInfo;
+import com.JobPortal.JobPortal.user.UserInfo;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
