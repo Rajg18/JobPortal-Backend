@@ -1,19 +1,12 @@
 package com.JobPortal.JobPortal.Application;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 public class UpdateStatusDTO {
 
-        @NotBlank
-        private String status; // ACCEPTED / REJECTED
+    @NotNull(message = "Status is required")
+    private ApplicationStatus status; // ACCEPTED or REJECTED
 
-        // getter & setter
-
-    public @NotBlank String getStatus() {
-        return status;
-    }
-
-    public void setStatus(@NotBlank String status) {
-        this.status = status;
-    }
+    public ApplicationStatus getStatus()                        { return status; }
+    public void               setStatus(ApplicationStatus status) { this.status = status; }
 }
-

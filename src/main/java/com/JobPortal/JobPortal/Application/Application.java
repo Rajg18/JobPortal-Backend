@@ -1,74 +1,49 @@
 package com.JobPortal.JobPortal.Application;
 
 import com.JobPortal.JobPortal.Job.Job;
-import com.JobPortal.JobPortal.UserInfo;
+import com.JobPortal.JobPortal.user.UserInfo;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
 @Entity
-    @Table(name = "applications",
-            uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "job_id"}))
-
+@Table(name = "applications",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "job_id"}))
 public class Application {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Long id;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserInfo user;
 
-        @ManyToOne
-        @JoinColumn(name = "user_id")
-        private UserInfo user;
+    @ManyToOne
+    @JoinColumn(name = "job_id", nullable = false)
+    private Job job;
 
-        @ManyToOne
-        @JoinColumn(name = "job_id")
-        private Job job;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ApplicationStatus status;
 
-        private String status; // APPLIED, ACCEPTED, REJECTED
+    @Column(nullable = false)
+    private LocalDateTime appliedAt;
 
-        private LocalDateTime appliedAt;
+    // ── Getters & Setters ─────────────────────────────────────────────────────
 
-        // getters & setters
+    public Long getId()                         { return id; }
+    public void setId(Long id)                  { this.id = id; }
 
-    public Long getId() {
-        return id;
-    }
+    public UserInfo getUser()                   { return user; }
+    public void     setUser(UserInfo user)      { this.user = user; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public Job  getJob()                        { return job; }
+    public void setJob(Job job)                 { this.job = job; }
 
-    public UserInfo getUser() {
-        return user;
-    }
+    public ApplicationStatus getStatus()                        { return status; }
+    public void               setStatus(ApplicationStatus status) { this.status = status; }
 
-    public void setUser(UserInfo user) {
-        this.user = user;
-    }
-
-    public Job getJob() {
-        return job;
-    }
-
-    public void setJob(Job job) {
-        this.job = job;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public LocalDateTime getAppliedAt() {
-        return appliedAt;
-    }
-
-    public void setAppliedAt(LocalDateTime appliedAt) {
-        this.appliedAt = appliedAt;
-    }
+    public LocalDateTime getAppliedAt()                         { return appliedAt; }
+    public void          setAppliedAt(LocalDateTime appliedAt)  { this.appliedAt = appliedAt; }
 }
-
