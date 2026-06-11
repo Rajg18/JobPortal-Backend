@@ -41,29 +41,36 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody AuthRequest authRequest) {
-        // Load user — throws UsernameNotFoundException (→ 401) if not found
-        UserDetails userDetails;
         try {
-            userDetails = service.loadUserByUsername(authRequest.getUsername());
+            // Load user
+            UserDetails userDetails = service.loadUserByUsername(authRequest.getUsername());
+
+            // Compare password against stored BCrypt hash
+            if (!passwordEncoder.matches(authRequest.getPassword(), userDetails.getPassword())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new ErrorResponse(401, "Invalid email or password. Please try again."));
+            }
+
+            // Build roles claim for the JWT
+            String roles = userDetails.getAuthorities()
+                    .stream()
+                    .map(a -> a.getAuthority())
+                    .collect(Collectors.joining(","));
+
+            String token = jwtService.generateToken(authRequest.getUsername(), roles);
+            return ResponseEntity.ok(new AuthResponse(token));
+
         } catch (UsernameNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new ErrorResponse(401, "Invalid email or password. Please try again."));
+        } catch (Exception ex) {
+            // Temporary: expose exception details for debugging
+            String detail = ex.getClass().getSimpleName() + ": " + ex.getMessage();
+            System.err.println("[LOGIN DEBUG] " + detail);
+            ex.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse(500, detail));
         }
-
-        // Compare password against stored BCrypt hash
-        if (!passwordEncoder.matches(authRequest.getPassword(), userDetails.getPassword())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ErrorResponse(401, "Invalid email or password. Please try again."));
-        }
-
-        // Build roles claim for the JWT
-        String roles = userDetails.getAuthorities()
-                .stream()
-                .map(a -> a.getAuthority())
-                .collect(Collectors.joining(","));
-
-        String token = jwtService.generateToken(authRequest.getUsername(), roles);
-        return ResponseEntity.ok(new AuthResponse(token));
     }
 
     @GetMapping("/user/profile")
