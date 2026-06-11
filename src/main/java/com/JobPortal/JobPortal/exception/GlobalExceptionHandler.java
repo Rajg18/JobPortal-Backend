@@ -45,9 +45,9 @@ public class GlobalExceptionHandler {
     // 400 — method-level validation failures (Spring Boot 4 / Spring Framework 7)
     @ExceptionHandler(HandlerMethodValidationException.class)
     public ResponseEntity<ErrorResponse> handleMethodValidation(HandlerMethodValidationException ex) {
-        String message = ex.getAllValidationResults().stream()
-                .flatMap(r -> r.getResolvableErrors().stream())
+        String message = ex.getAllErrors().stream()
                 .map(org.springframework.context.MessageSourceResolvable::getDefaultMessage)
+                .filter(m -> m != null && !m.isBlank())
                 .collect(Collectors.joining(", "));
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
