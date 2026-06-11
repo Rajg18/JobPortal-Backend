@@ -1,11 +1,14 @@
 package com.JobPortal.JobPortal.auth;
 
+import com.JobPortal.JobPortal.exception.ErrorResponse;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.stream.Collectors;
@@ -16,14 +19,14 @@ public class UserController {
 
     private final UserInfoService service;
     private final JWTservice jwtService;
-    private final AuthenticationManager authenticationManager;
+    private final PasswordEncoder passwordEncoder;
 
     public UserController(UserInfoService service,
                           JWTservice jwtService,
-                          AuthenticationManager authenticationManager) {
+                          PasswordEncoder passwordEncoder) {
         this.service = service;
         this.jwtService = jwtService;
-        this.authenticationManager = authenticationManager;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping("/welcome")
@@ -37,25 +40,30 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest authRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        authRequest.getUsername(),
-                        authRequest.getPassword()));
-
-        if (authentication.isAuthenticated()) {
-            // Collect all authorities (e.g. "ADMIN" or "USER") into a comma-separated string
-            // and embed them as the "roles" claim inside the JWT so the frontend can read them.
-            String roles = authentication.getAuthorities()
-                    .stream()
-                    .map(a -> a.getAuthority())
-                    .collect(Collectors.joining(","));
-
-            String token = jwtService.generateToken(authRequest.getUsername(), roles);
-            return ResponseEntity.ok(new AuthResponse(token));
+    public ResponseEntity<?> login(@Valid @RequestBody AuthRequest authRequest) {
+        // Load user — throws UsernameNotFoundException (→ 401) if not found
+        UserDetails userDetails;
+        try {
+            userDetails = service.loadUserByUsername(authRequest.getUsername());
+        } catch (UsernameNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ErrorResponse(401, "Invalid email or password. Please try again."));
         }
 
-        throw new UsernameNotFoundException("Invalid credentials");
+        // Compare password against stored BCrypt hash
+        if (!passwordEncoder.matches(authRequest.getPassword(), userDetails.getPassword())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ErrorResponse(401, "Invalid email or password. Please try again."));
+        }
+
+        // Build roles claim for the JWT
+        String roles = userDetails.getAuthorities()
+                .stream()
+                .map(a -> a.getAuthority())
+                .collect(Collectors.joining(","));
+
+        String token = jwtService.generateToken(authRequest.getUsername(), roles);
+        return ResponseEntity.ok(new AuthResponse(token));
     }
 
     @GetMapping("/user/profile")
