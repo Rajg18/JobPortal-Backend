@@ -4,7 +4,6 @@ import com.JobPortal.JobPortal.exception.ErrorResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -63,13 +62,6 @@ public class UserController {
         } catch (UsernameNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new ErrorResponse(401, "Invalid email or password. Please try again."));
-        } catch (Exception ex) {
-            // Temporary: expose exception details for debugging
-            String detail = ex.getClass().getSimpleName() + ": " + ex.getMessage();
-            System.err.println("[LOGIN DEBUG] " + detail);
-            ex.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ErrorResponse(500, detail));
         }
     }
 
