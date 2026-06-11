@@ -26,10 +26,10 @@ public class JWTservice {
     public String generateToken(String email, String roles) {
         return Jwts.builder()
                 .subject(email)
-                .claim("roles", roles)   // ← roles embedded so Flutter can read it
+                .claim("roles", roles)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationMs))
-                .signWith(getSignKey())
+                .signWith(getSignKey(), Jwts.SIG.HS256)
                 .compact();
     }
 
